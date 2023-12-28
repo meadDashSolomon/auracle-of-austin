@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Sidebar from "./components/Sidebar";
-import Chat from "./components/Chat";
+import TextInput from "./components/TextInput";
+import MessageFeed from "./components/MessageFeed";
 
 export default function Home() {
   return (
@@ -11,7 +12,8 @@ export default function Home() {
       </div>
       {/* Chat Component - Takes the remaining space and flex-grow */}
       <div className="flex-1 flex flex-col">
-        <Chat />
+        <MessageFeed />
+        <TextInput />
       </div>
     </div>
   );

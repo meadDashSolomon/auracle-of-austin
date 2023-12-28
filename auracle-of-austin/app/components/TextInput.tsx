@@ -26,15 +26,10 @@ const TextInput = () => {
     const maxHeight = 400; // Maximum height in pixels
     e.target.style.height = "inherit"; // Reset the height to recalculate
     const scrollHeight = e.target.scrollHeight; // Get the scroll height of the content
-    if (scrollHeight > maxHeight) {
-      // If the scrollHeight is greater than maxHeight, set it to maxHeight and enable scrolling
-      e.target.style.height = `${maxHeight}px`;
-      e.target.style.overflowY = "auto"; // Enable scrolling
-    } else {
-      // If the content is less than maxHeight, grow the textarea
-      e.target.style.height = `${scrollHeight}px`;
-      e.target.style.overflowY = "hidden"; // Hide the scrollbar when not needed
-    }
+    // Height of text area is min of scroll height and max height
+    e.target.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+    // If content is less than max height, hide scroll bar
+    e.target.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
   };
 
   return (

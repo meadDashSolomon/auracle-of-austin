@@ -1,8 +1,10 @@
 "use client";
+import { saveMessage } from "@/util/api";
 import { useState } from "react";
 
 const TextInput = () => {
   const [message, setMessage] = useState("");
+  const [conversationId, setConversationId] = useState(null);
 
   // Temporary handlers for buttons
   const handleFileUpload = (e) => {
@@ -10,11 +12,20 @@ const TextInput = () => {
     console.log(e.target.files);
   };
 
-  const handleSubmit = () => {
-    // Handle the submit event
-    console.log("Message submitted:", message);
-    // Clear the textarea after submit
-    setMessage("");
+  const handleSubmit = async () => {
+    // Define sender
+    const sender = "user";
+
+    try {
+      // Save message
+      const newMessage = await saveMessage(message, sender, conversationId);
+      // Set conversation Id
+      setConversationId(newMessage.conversationId);
+      // Clear the textarea after submit
+      setMessage("");
+    } catch (error) {
+      console.error(error.message);
+    }
   };
 
   const handleChange = (e) => {

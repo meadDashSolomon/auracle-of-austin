@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
 interface message {
-  content: string;
+  message: string;
   sender: string;
   timestamp?: Date;
 }
 
 const messageSchema = new mongoose.Schema<message>({
-  content: {
+  message: {
     type: String,
     required: true,
   },

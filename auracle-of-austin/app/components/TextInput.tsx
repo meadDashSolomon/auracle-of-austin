@@ -2,9 +2,8 @@
 import { getGptResponse, saveMessage } from "@/util/api";
 import { useState } from "react";
 
-const TextInput = () => {
+const TextInput = ({ conversationId, setConversationId, setConversation }) => {
   const [message, setMessage] = useState("");
-  const [conversationId, setConversationId] = useState(null);
 
   // Temporary handlers for buttons
   const handleFileUpload = (e) => {
@@ -27,6 +26,8 @@ const TextInput = () => {
       const saveBothMessages = await saveMessage(messages, conversationId);
       // Set conversation Id
       setConversationId(saveBothMessages.conversationId);
+      // Update conversation state
+      setConversation((prevMessages) => [...prevMessages, ...messages]);
 
       // Clear the textarea after submit
       setMessage("");

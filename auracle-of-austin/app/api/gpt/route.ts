@@ -41,8 +41,6 @@ export async function POST(req: Request) {
     .map((choice) => choice.message.content)
     .join("\n");
 
-  console.log(responseText);
-
   // Return a serialized response to the client
   return NextResponse.json({ responseText });
 }

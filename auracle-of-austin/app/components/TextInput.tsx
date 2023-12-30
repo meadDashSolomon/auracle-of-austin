@@ -12,6 +12,11 @@ const TextInput = ({ conversationId, setConversationId, setConversation }) => {
   };
 
   const handleSubmit = async () => {
+    if (!message.trim()) {
+      console.log("No message entered");
+      return;
+    }
+
     console.log("handleSubmit triggered");
     try {
       // Get response from Open AI's api

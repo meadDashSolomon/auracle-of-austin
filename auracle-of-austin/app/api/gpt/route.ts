@@ -13,6 +13,11 @@ export async function POST(req: Request) {
   const { message, conversationId } = await req.json();
   let formattedMessages = [];
 
+  if (!message) {
+    console.log("Error: User must submit a message!");
+    return NextResponse.json({ error: "No message provided" });
+  }
+
   // Retrieve chat history if conversationId is provided
   if (conversationId) {
     const conversation = await Conversation.findById(conversationId);

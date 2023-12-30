@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   await dbConnect();
 
-  const { message, sender, conversationId } = await req.json();
+  const { messages, conversationId } = await req.json();
 
   let conversation;
   // check if convo exists
@@ -15,9 +15,8 @@ export async function POST(req: Request) {
     conversation = new Conversation();
   }
 
-  // Add new message
-  const newMessage = { message, sender };
-  conversation.messages.push(newMessage);
+  // Add new messages
+  messages.forEach((message) => conversation.messages.push(message));
 
   // Save the updated or new conversation document
   await conversation.save();

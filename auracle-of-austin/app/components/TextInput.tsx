@@ -13,14 +13,26 @@ const TextInput = () => {
   };
 
   const handleSubmit = async () => {
-    // Define sender
-    const sender = "user";
-
     try {
-      // Save message
-      const newMessage = await saveMessage(message, sender, conversationId);
+      // Get response from Open AI's api
+      const gptResponse = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ message: message }),
+      });
+      const { reply } = await gptResponse.json();
+
+      // Save both user message and GPT response
+      const messagesToSave = [
+        { message, sender: "user" },
+        { message: reply, sender: "bot" },
+      ];
+      const saveBothMessages = await saveMessage(
+        messagesToSave,
+        conversationId
+      );
       // Set conversation Id
-      setConversationId(newMessage.conversationId);
+      setConversationId(saveBothMessages.conversationId);
+
       // Clear the textarea after submit
       setMessage("");
     } catch (error) {

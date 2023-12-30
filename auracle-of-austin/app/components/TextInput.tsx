@@ -1,5 +1,5 @@
 "use client";
-import { saveMessage } from "@/util/api";
+import { getGptResponse, saveMessage } from "@/util/api";
 import { useState } from "react";
 
 const TextInput = () => {
@@ -13,30 +13,25 @@ const TextInput = () => {
   };
 
   const handleSubmit = async () => {
+    console.log("handleSubmit triggered");
     try {
       // Get response from Open AI's api
-      const gptResponse = await fetch("/api/chat", {
-        method: "POST",
-        body: JSON.stringify({ message: message }),
-      });
-      const { reply } = await gptResponse.json();
+      const gptResponse = await getGptResponse(message, conversationId);
 
       // Save both user message and GPT response
-      const messagesToSave = [
-        { message, sender: "user" },
-        { message: reply, sender: "bot" },
+      const messages = [
+        { message: message, sender: "user" },
+        { message: gptResponse.responseText, sender: "bot" },
       ];
-      const saveBothMessages = await saveMessage(
-        messagesToSave,
-        conversationId
-      );
+
+      const saveBothMessages = await saveMessage(messages, conversationId);
       // Set conversation Id
       setConversationId(saveBothMessages.conversationId);
 
       // Clear the textarea after submit
       setMessage("");
     } catch (error) {
-      console.error(error.message);
+      console.error("Error in handleSubmit:", error);
     }
   };
 

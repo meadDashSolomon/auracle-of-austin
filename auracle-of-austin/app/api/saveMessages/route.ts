@@ -5,7 +5,9 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   await dbConnect();
 
-  const { messages, conversationId } = await req.json();
+  const requestBody = await req.json();
+
+  const { messages, conversationId } = requestBody;
 
   let conversation;
   // check if convo exists

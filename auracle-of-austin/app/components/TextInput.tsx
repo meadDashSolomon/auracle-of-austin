@@ -1,8 +1,14 @@
 "use client";
-import { getGptResponse, saveMessage } from "@/util/api";
-import { useState } from "react";
+import { getGptResponse, saveMessages, getMessages } from "@/util/api";
+import { checkTokens } from "@/util/checkTokens";
+import { useState, useEffect } from "react";
 
-const TextInput = ({ conversationId, setConversationId, setConversation }) => {
+const TextInput = ({
+  conversation,
+  conversationId,
+  setConversationId,
+  setConversation,
+}) => {
   const [message, setMessage] = useState("");
 
   // Temporary handlers for buttons
@@ -11,30 +17,66 @@ const TextInput = ({ conversationId, setConversationId, setConversation }) => {
     console.log(e.target.files);
   };
 
+  // Load conversation when the component mounts or when conversationId changes
+  useEffect(() => {
+    const fetchConversation = async () => {
+      if (conversationId) {
+        const oldMessages = await getMessages(conversationId);
+        setConversation(oldMessages);
+      }
+    };
+
+    fetchConversation();
+  }, [conversationId]);
+
   const handleSubmit = async () => {
+    // Edge case - no text submitted
     if (!message.trim()) {
       console.log("No message entered");
       return;
     }
 
+    // Log to console to indicate waiting for APIs
     console.log("handleSubmit triggered");
-    try {
-      // Get response from Open AI's api
-      const gptResponse = await getGptResponse(message, conversationId);
 
-      // Save both user message and GPT response
-      const messages = [
-        { message: message, sender: "user" },
-        { message: gptResponse.responseText, sender: "bot" },
+    // API calls
+    try {
+      // Add new user message to the conversation array
+      let updatedConversation = [
+        ...conversation,
+        { role: "user", content: message },
       ];
 
-      const saveBothMessages = await saveMessage(messages, conversationId);
-      // Set conversation Id
-      setConversationId(saveBothMessages.conversationId);
-      // Update conversation state
-      setConversation((prevMessages) => [...prevMessages, ...messages]);
+      // Get token count of messages and truncate if necessary
+      updatedConversation = await checkTokens(updatedConversation);
 
-      // Clear the textarea after submit
+      // Get response from Open AI's api
+      const gptResponse = await getGptResponse(updatedConversation);
+
+      // Add GPT response to the conversation array
+      updatedConversation.push({
+        role: "assistant",
+        content: gptResponse.responseText,
+      });
+
+      // Update conversation state for MessageFeed component
+      setConversation(updatedConversation);
+
+      // Save both user message and GPT response to db
+      const saveNewMessages = await saveMessages(
+        [
+          { content: message, role: "user" },
+          { content: gptResponse.responseText, role: "assistant" },
+        ],
+        conversationId
+      );
+
+      // Update conversation Id
+      if (conversationId === null) {
+        setConversationId(saveNewMessages.conversationId);
+      }
+
+      // Clear the text area after submit
       setMessage("");
     } catch (error) {
       console.error("Error in handleSubmit:", error);

@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
 
 interface message {
-  message: string;
-  sender: string;
+  content: string;
+  role: string;
   timestamp?: Date;
 }
 
 const messageSchema = new mongoose.Schema<message>({
-  message: {
+  content: {
     type: String,
     required: true,
   },
-  sender: {
+  role: {
     type: String,
     required: true,
-    enum: ["user", "bot"],
+    enum: ["user", "assistant"],
   },
   timestamp: {
     type: Date,

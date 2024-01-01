@@ -13,10 +13,10 @@ const MessageFeed = ({ messages }) => {
         <div
           key={i}
           className={`${
-            msg.sender === "user" ? "bg-blue-400" : "bg-gray-400"
+            msg.role === "user" ? "bg-blue-400" : "bg-gray-400"
           } text-white p-2 rounded-lg mb-2`}
         >
-          {msg.message}
+          {msg.content}
         </div>
       ))}
       <div ref={endOfMessagesRef} />

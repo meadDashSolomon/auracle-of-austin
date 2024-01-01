@@ -1,5 +1,3 @@
-import Conversation from "@/models/Conversation";
-import dbConnect from "@/util/db";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -8,44 +6,33 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: Request) {
-  await dbConnect();
+  // Retrieve the messages array directly from the request
+  const { messages } = await req.json();
 
-  const { message, conversationId } = await req.json();
-  let formattedMessages = [];
-
-  if (!message) {
-    console.log("Error: User must submit a message!");
-    return NextResponse.json({ error: "No message provided" });
+  if (messages.length === 0) {
+    console.log("Error: No messages provided!");
+    return NextResponse.json({ error: "No messages provided" });
   }
 
-  // Retrieve chat history if conversationId is provided
-  if (conversationId) {
-    const conversation = await Conversation.findById(conversationId);
-
-    // Format each message from the conversation history
-    formattedMessages = conversation.messages.map((m) => {
-      return {
-        role: m.sender === "user" ? "user" : "assistant",
-        content: m.message,
-      };
+  try {
+    // Request response from GPT
+    const gptResponse = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: messages,
     });
+
+    // Extract the text content from the response
+    const responseText = gptResponse.choices
+      .map((choice) => choice.message.content)
+      .join("\n");
+
+    // Return a serialized response to the client
+    return NextResponse.json({ responseText });
+  } catch (error) {
+    console.error("Error in GPT API call:", error);
+    return NextResponse.json(
+      { error: "Error in GPT API call" },
+      { status: 500 }
+    );
   }
-
-  // Add new prompt to the message array
-  formattedMessages.push({ role: "user", content: message });
-
-  // Check for token limits and handle, if nec
-  const gptResponse = await openai.chat.completions.create({
-    messages: formattedMessages,
-    model: "gpt-3.5-turbo",
-  });
-  console.log(gptResponse);
-
-  // Extract the text content from the response
-  const responseText = gptResponse.choices
-    .map((choice) => choice.message.content)
-    .join("\n");
-
-  // Return a serialized response to the client
-  return NextResponse.json({ responseText });
 }

@@ -26,6 +26,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col">
         <MessageFeed messages={conversation} />
         <TextInput
+          conversation={conversation}
           conversationId={conversationId}
           setConversation={setConversation}
           setConversationId={setConversationId}
